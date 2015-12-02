@@ -18,4 +18,4 @@ It relies on gdal.
 It is based on Martin Trauth's "MATLAB Recipes for Earth Science", published by Springer.
 
 ```Croper.py``` crops multiple images to the same size and at the same pixel location.
-Output from say matplotlib can be trimmed if needed so that all images match in size and form.
+Output from e.g. matplotlib can be trimmed if needed so that all images match in size and form.
