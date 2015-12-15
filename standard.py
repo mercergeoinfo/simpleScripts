@@ -12,7 +12,7 @@ __date__ = '25/08/2015'
 import sys
 import os
 # import glob
-# import fnmatch
+import fnmatch
 # import gc
 import csv
 import pickle
@@ -23,6 +23,7 @@ import pickle
 # import os.path
 # import zipfile
 # import StringIO
+# import itertools
 #
 ## IMAGE MANIPULATION
 # import cv2
@@ -189,7 +190,7 @@ def import2vector(fileName, dateString = '%d/%m/%y %H:%M:%S', importError = 'yes
             data['Description'][(str(i)+'_median')] = np.median(data[i])
         except:
             if  importError == 'yes':
-                print "\nStatistics not computable for %s\n" % str(i)
+                print "Statistics not computable for %s" % str(i)
     return data
 #
 def nancov(m):

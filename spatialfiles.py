@@ -23,6 +23,7 @@ import os
 # import os.path
 # import zipfile
 # import StringIO
+# import itertools
 #
 ## IMAGE MANIPULATION
 import cv2
