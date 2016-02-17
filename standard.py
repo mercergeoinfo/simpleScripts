@@ -17,7 +17,7 @@ import fnmatch
 import csv
 import pickle
 # import time
-# from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 # import subprocess
 # import urllib2
 # import os.path
@@ -42,6 +42,7 @@ from scipy.stats.stats import nanmean
 # from scipy.stats import norm
 # from pandas import Series, DataFrame
 # import pandas as pd
+import statsmodels.tsa.stattools
 #
 ## GIS SUPPORT
 # import gdal
@@ -153,7 +154,7 @@ def import2vector(fileName, dateString = '%d/%m/%y %H:%M:%S', importError = 'yes
     data['Description']['Source'] = Name
     i=0
     # Set up list of Nan values
-    nanlist = ['NAN','NaN','nan','NULL','null','-9999',-9999,'']
+    nanlist = ['NAN','NaN','nan','na','NULL','null','-9999',-9999,'']
     # Read through data file
     for i in Headers:
         data[i] = []
@@ -216,3 +217,15 @@ def fitFunc(xvec,yvec,fitOrder=1):
     z = np.polyfit(np.array(xvec), np.array(yvec), fitOrder)
     p = np.poly1d(z)
     return p
+#
+#
+def  quickStats(x, lags = 12):
+    '''Descriptive statistics for list/array'''
+    stats = {}
+    stats['Minimum'] = np.nanmin(x)
+    stats['Maximum'] = np.nanmax(x)
+    stats['Mean']= np.nanmean(x)
+    stats['StdDev'] = np.nanstd(x)
+    stats['Median'] = np.median(x)
+    stats['Autocorrelate'] =statsmodels.tsa.stattools.acf(x, unbiased=False, nlags=lags, qstat=False, fft=False, alpha=None)
+    return stats
