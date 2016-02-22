@@ -520,9 +520,11 @@ def rasterDiff(Afile, Bfile, outfolder):
 	BvecNan = Bvec[np.logical_not(np.isnan(Bvec))]
 	#
 	AdataMasked = np.ma.masked_array(np.nan_to_num(Adata), mask=np.isnan(Adata) & np.isnan(Bdata))
-	BdataMasked	 = np.ma.masked_array(np.nan_to_num(Bdata), mask=AdataMasked.mask)
+	BdataMasked = np.ma.masked_array(np.nan_to_num(Bdata), mask=AdataMasked.mask)
 	#
-	ABcovmat = np.cov(AvecNan,BvecNan)
+	maskAvec = np.ma.array(Avec, mask=np.isnan(Avec))
+	maskBvec = np.ma.array(Bvec, mask=np.isnan(Bvec))
+	ABcovmat = np.ma.cov(maskAvec,maskBvec)
 	ABcov = ABcovmat[0,1]
 	Amean = np.nanmean(Adata)
 	Astd = ABcovmat[0,0]**0.5
