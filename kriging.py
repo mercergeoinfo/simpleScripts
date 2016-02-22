@@ -162,10 +162,49 @@ def kriging(*args,**kwargs):
 	for i in range(len(Zin)):
 		if np.isnan(Zin[i]) | np.isinf(Zin[i]):
 			checklist.append(i)
-	Znan = np.delete(Zin, checklist)
+	Z = np.delete(Zin, checklist)
 	X = np.delete(Xin, checklist)
 	Y = np.delete(Yin, checklist)
 	#
+	# Was missing?
+	Zminvec = []
+	Zmaxvec = []
+	Zminvec.append(np.min(Z))
+	Zmaxvec.append(np.max(Z))
+	Zp = Z[:] # Copy Z for plot
+	yn = ['y','n']
+	#
+	# DETREND
+	detq = '' # DETREND
+	while detq not in yn: # DETREND
+		detq = raw_input('Detrend data? ') # DETREND
+	if detq == 'y': # DETREND
+		Z, Z_retrend = detrend(X,Y,Z,Xg,Yg,Xg1,Yg1,outDir,namstr) # DETREND
+		tfilename = datawrite(Z_retrend,demdata,demmeta,namstr+'_detrend',outDir) # DETREND
+		DEMmaskedtrend = np.ma.masked_where(demdata == demmeta[6], Z_retrend) # DETREND
+		filnm2 = namstr + '_detrendp' # DETREND
+		krigplot(Xg1,Yg1,X,Y,Z,DEMmaskedtrend,filnm2,outDir) # DETREND
+		print "Trend surface plotted to ", tfilename # DETREND
+	Zminvec.append(np.min(Z))
+	Zmaxvec.append(np.max(Z))
+	#
+	# TRANSLATE TO POSITIVE
+	shifa = '' # TRANSLATE TO POSITIVE
+	print "Minimum value in dataset %2.4f" % (np.min(Z)) # TRANSLATE TO POSITIVE
+	if np.min(Z) <= 0: # TRANSLATE TO POSITIVE
+		while shifa not in yn: # TRANSLATE TO POSITIVE
+			shifa = raw_input("Translate data to positive values only (for log transforms)? ") # TRANSLATE TO POSITIVE
+			if shifa == 'y': # TRANSLATE TO POSITIVE
+				minval = np.min(Z) # TRANSLATE TO POSITIVE
+				if minval > 0: # TRANSLATE TO POSITIVE
+					print "No translation needed" # TRANSLATE TO POSITIVE
+				elif minval <= 0: # TRANSLATE TO POSITIVE
+					# shift = np.finfo(float).eps - minval # TRANSLATE TO POSITIVE
+					shift = 1 - minval # TRANSLATE TO POSITIVE
+					Z = Z + shift # TRANSLATE TO POSITIVE
+		Zminvec.append(np.min(Z)) # TRANSLATE TO POSITIVE
+		Zmaxvec.append(np.max(Z)) # TRANSLATE TO POSITIVE
+	# To here
 	#
 	## _kriging_logtrans__
 	# Should data be log transformed?
@@ -251,7 +290,7 @@ def kriging(*args,**kwargs):
 		if not os.path.exists(outDirEst):
 			os.makedirs(outDirEst)
 		G_mod, modelTypes = modelPlotter(nugget,sill,D,range_,lag,max_lags,DE,GE,GEest,GErsqrd,namstr,outDirEst,alpha)
-		print 'VARIOGRAM ESTIMATES AND MODEL PLOTS SAVED TO:\n',outDir,'\nPLEASE REVIEW BEFORE PROCEEDING.'
+		print '\nVARIOGRAM ESTIMATES AND MODEL PLOTS SAVED TO:\n',outDir,'\nPLEASE REVIEW BEFORE PROCEEDING.'
 		#
 		## __kriging_varModSetup__
 		# Ask user to set sill, nugget and lag
@@ -312,7 +351,7 @@ def kriging(*args,**kwargs):
 			G_mod, modSel = modelSelect(modelnr,nugget,sill,D,range_,alpha)
 			G_mod_export,G_mod_export_rsqrd,G_mod_poly1d,G_mod_exp = VarModPrep(D,lag,max_lags,DE,GE,G_mod)
 			varestplt(DE,GE,GEest,GErsqrd,nugget,sill,range_,namstr,outDir,G_mod_export,G_mod_export_rsqrd,modSel)
-			print 'Variogram model plots saved to:\n',outDir,'\nPLEASE REVIEW BEFORE PROCEEDING.\n\n'
+			print '\nVariogram model plots saved to:\n',outDir,'\nPLEASE REVIEW BEFORE PROCEEDING.\n\n'
 			contAns = raw_input('Enter "yes" to accept this model or any other key to repeat choices: ')
 		modelGood = raw_input("Are you sure you want to continue with this model? ")
 	# Krige data
@@ -323,7 +362,7 @@ def kriging(*args,**kwargs):
 		#for x in np.nditer(Zkg, op_flags=['readwrite']):
 			#x[...] = 10 ** x
 		Zkg = np.exp(Zkg)
-		print np.min(Zkg), np.mean(Zkg), np.max(Zkg)
+		print np.nanmin(Zkg), np.mean(Zkg), np.nanmax(Zkg)
 		Z = np.exp(Z)
 	#
 	try:
